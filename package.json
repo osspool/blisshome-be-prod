@@ -7,9 +7,7 @@
   "scripts": {
     "dev": "nodemon --experimental-specifier-resolution=node --exec babel-node src/index.js",
     "start": "node --experimental-specifier-resolution=node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d dist",
-    "start-prod": "node dist/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
     "node": "20.12.2"
