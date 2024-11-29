@@ -1,0 +1,64 @@
+{
+  "name": "ecom",
+  "version": "1.0.0",
+  "description": "Hello Node.js",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon --experimental-specifier-resolution=node --exec babel-node src/index.js",
+    "start": "node --experimental-specifier-resolution=node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d dist",
+    "start-prod": "node dist/index.js"
+  },
+  "engines": {
+    "node": "20.12.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "bottleneck": "^2.19.5",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.7.2",
+    "mongoose-paginate-v2": "^1.8.5",
+    "multer": "^1.4.5-lts.1",
+    "querystring": "^0.2.1",
+    "sharp": "^0.33.5",
+    "slugify": "^1.6.6",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^0.0.0",
+    "eslint": "^9.14.0",
+    "globals": "^15.12.0",
+    "nodemon": "^3.1.7"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "imports": {
+    "#src/*": "./src/*",
+    "#models/*": "./src/models/*",
+    "#middlewares/*": "./src/middlewares/*",
+    "#routes/*": "./src/routes/*",
+    "#services/*": "./src/services/*",
+    "#utils/*": "./src/utils/*",
+    "#config/*": "./src/config/*",
+    "#controllers/*": "./src/controllers/*",
+    "#validators/*": "./src/validators/*"
+  }
+}
