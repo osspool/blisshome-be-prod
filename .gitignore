@@ -112,3 +112,6 @@ ehthumbs.db
 
 # Linux
 *.swp
+
+# Static files
+/uploads/*
