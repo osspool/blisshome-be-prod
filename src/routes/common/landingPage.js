@@ -3,7 +3,7 @@ import express from "express";
 import {
   getLandingPage,
   updateLandingPage,
-} from "../controllers/landingPageController.js";
+} from "#controllers/admin/landingPageController.js";
 import { protect, authorize } from "../../middlewares/authMiddleware.js";
 import multer from "multer";
 

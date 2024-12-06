@@ -21,7 +21,7 @@ import paymentRoutes from "./routes/order/payments.js";
 import customerRoutes from "./routes/common/customers.js"
 import dashboardRoutes from "./routes/common/dashboard.js";
 import recommendationRoutes from "./routes/product/recommendations.js";
-// import landingPageRoutes from "./routes/landingPage.js";
+// import landingPageRoutes from "./routes/common/landingPage.js"
 import orderRoutes from "./routes/order/orders.js";
 
 // Middleware
@@ -94,7 +94,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", apiKeyMiddleware, productRoutes);
 app.use("/api/categories", apiKeyMiddleware,  categoryRoutes);
 app.use("/api/carts", apiKeyMiddleware, cartRoutes);
-// app.use("/api/admin/landing", landingPageRoutes);
+// app.use("/api/landing-page", landingPageRoutes);
 app.use('/api/addresses', apiKeyMiddleware, addressRoutes);
 app.use("/api/orders", apiKeyMiddleware, orderRoutes);
 app.use("/api/coupons", apiKeyMiddleware, couponRoutes);

@@ -1,5 +1,5 @@
 // controllers/landingPageController.js
-import LandingPage from "../../models/LandingPage.js";
+import LandingPage from "#models/admin/LandingPage.js";
 import { processAndSaveImage, deleteImage } from "../../services/imageService.js";
 
 /**
