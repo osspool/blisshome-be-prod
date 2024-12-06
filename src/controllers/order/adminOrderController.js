@@ -58,12 +58,12 @@ export const updateOrderStatus = async (req, res) => {
     // Assuming role check is already handled by middleware
 
     // Optional: Check payment verification before proceeding
-    if (order.payment) {
-      const payment = await Payment.findById(order.payment);
-      if (order.paymentType === "online" && !payment.verified) {
-        return res.status(400).json({ message: "Payment not verified yet. Cannot update order status." });
-      }
-    }
+    // if (order.payment) {
+    //   const payment = await Payment.findById(order.payment);
+    //   if (order.paymentType === "online" && !payment.verified) {
+    //     return res.status(400).json({ message: "Payment not verified yet. Cannot update order status." });
+    //   }
+    // }
 
     // Update status and add to statusHistory
     order.status = status;

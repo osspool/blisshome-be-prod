@@ -1,5 +1,4 @@
 // services/addressService.js
-import User from "#models/User.js";
 
 /**
  * Retrieves the delivery address based on the provided flag.
@@ -10,12 +9,7 @@ import User from "#models/User.js";
  * @returns {Object} - Formatted delivery address.
  * @throws {Error} - If address retrieval fails.
  */
-export const getDeliveryAddress = async (
-  user,
-  useSavedAddress,
-  deliveryAddressId,
-  manualAddress
-) => {
+export const getDeliveryAddress = async (user, useSavedAddress, deliveryAddressId, manualAddress) => {
   if (useSavedAddress) {
     if (!deliveryAddressId) {
       throw new Error("Delivery address ID is required when using a saved address.");
@@ -24,7 +18,6 @@ export const getDeliveryAddress = async (
     if (!address) {
       throw new Error("Invalid delivery address ID.");
     }
-    // Return the address as a plain object
     return {
       label: address.label,
       addressLine1: address.addressLine1,
@@ -39,29 +32,7 @@ export const getDeliveryAddress = async (
     if (!manualAddress) {
       throw new Error("Manual address details are required.");
     }
-    const {
-      label,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      phone,
-    } = manualAddress;
-
-    // Optionally, validate the presence of required fields here
-
-    // Return the manual address as provided
-    return {
-      label,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      phone,
-    };
+    const { label, addressLine1, addressLine2, city, state, postalCode, country, phone } = manualAddress;
+    return { label, addressLine1, addressLine2, city, state, postalCode, country, phone };
   }
 };

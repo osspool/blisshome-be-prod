@@ -1,5 +1,4 @@
-import Product from "../../models/Product";
-import Category from "../../models/Category";
+import Product from "#models/product/Product.js";
 
 // @desc    Get recommended products based on category
 // @route   GET /api/recommendations/:productId
@@ -18,8 +17,8 @@ export const getRecommendations = async (req, res) => {
       category: product.category._id,
       _id: { $ne: product._id },
     })
-      .limit(10)
-      .select("name price images");
+      .limit(4)
+      .select("name price images basePrice discount");
 
     res.json(recommendations);
   } catch (error) {

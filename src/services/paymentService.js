@@ -3,6 +3,11 @@ import Payment from "#models/order/Payment.js";
 import Order from "#models/order/Order.js";
 import PaymentMethod from "#models/order/PaymentMethod.js";
 
+export const createPaymentRecord = async (paymentData) => {
+  const payment = new Payment(paymentData);
+  const createdPayment = await payment.save();
+  return createdPayment;
+};
 
 /**
  * Creates a Payment record for the given order.
@@ -14,12 +19,7 @@ import PaymentMethod from "#models/order/PaymentMethod.js";
  * @returns {Object} - Created Payment object.
  * @throws {Error} - If payment method validation fails.
  */
-export const createPayment = async ({
-  orderId,
-  customerId,
-  paymentMethodId,
-  paymentMethodName,
-}) => {
+export const createPayment = async ({ orderId, customerId, paymentMethodId, paymentMethodName, metaData }) => {
   const paymentData = {
     order: orderId,
     customer: customerId,
@@ -37,12 +37,12 @@ export const createPayment = async ({
     }
 
     paymentData.method = paymentMethod._id;
-    paymentData.verified = false; // For online payments
+    paymentData.verified = false; 
   } else {
-    paymentData.verified = true; // For COD
+    paymentData.verified = true; 
   }
 
-  const payment = new Payment(paymentData);
+  const payment = await createPaymentRecord(paymentData);
   await payment.save();
   return payment;
 };

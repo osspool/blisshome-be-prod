@@ -38,7 +38,6 @@ export const calculateDiscount = async (couponCode, totalAmount) => {
     discount = coupon.discountAmount;
   }
 
-  // Update coupon usage
   coupon.usedCount += 1;
   await coupon.save();
 

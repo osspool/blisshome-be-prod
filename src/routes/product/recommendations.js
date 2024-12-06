@@ -1,5 +1,5 @@
 import express from "express";
-import { getRecommendations } from "../controllers/recommendationController";
+import { getRecommendations } from "#controllers/product/recommendationController.js";
 
 const router = express.Router();
 // Public route

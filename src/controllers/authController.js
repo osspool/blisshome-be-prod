@@ -39,7 +39,7 @@ const login = async (req, res) => {
     }
 
     const { token, refreshToken } = generateTokens(user);
-    console.log("logging in", user);
+    // console.log("logging in", user);
 
     res.json({
       token,

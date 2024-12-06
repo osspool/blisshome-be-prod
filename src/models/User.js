@@ -1,6 +1,7 @@
 // src/models/User.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const addressSchema = new mongoose.Schema(
   {
@@ -58,6 +59,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.plugin(mongoosePaginate);
 // Password comparison method
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);

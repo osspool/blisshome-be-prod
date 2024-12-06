@@ -1,35 +1,25 @@
-// services/imageService.js
+// services/s3ImageService.js
 import sharp from "sharp";
-import path from "path";
-import fs from "fs/promises";
-import { fileURLToPath } from "url";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+  },
+});
 
-const IMAGE_DIR_PRODUCTS = path.join(__dirname, "../../uploads/images/products");
-const IMAGE_DIR_LANDING = path.join(__dirname, "../../uploads/images/landing");
-const IMAGE_DIR_CATEGORIES = path.join(__dirname, "../../uploads/images/categories");
-
-const BASE_URL = process.env.BACKEND_URL || "http://localhost:3080";
-
-// Ensure directories exist
-Promise.all([
-  fs.mkdir(IMAGE_DIR_PRODUCTS, { recursive: true }),
-  fs.mkdir(IMAGE_DIR_LANDING, { recursive: true }),
-  fs.mkdir(IMAGE_DIR_CATEGORIES, { recursive: true })
-]).catch(console.error);
+const BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const BASE_URL = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 
 /**
- * Processes and saves an image as WebP with optional resizing.
+ * Processes and saves an image as WebP to S3 with optional resizing.
  * @param {Buffer} buffer - The image buffer.
  * @param {String} originalName - The original file name.
  * @param {String} type - The type of image ('product', 'landing', 'category').
  * @param {Object} options - Optional parameters.
- * @param {Number} [options.resizeWidth=800] - The width to resize the image to.
- * @param {Boolean} [options.disableResize=false] - If true, skips resizing.
- * @param {Number} [options.quality=80] - WebP quality (0-100).
  * @returns {String} - The URL of the saved image.
  */
 export const processAndSaveImage = async (
@@ -44,23 +34,6 @@ export const processAndSaveImage = async (
     quality = 80
   } = options;
 
-  const uniqueSuffix = uuidv4();
-  const filename = `${uniqueSuffix}.webp`; // Always use .webp extension
-  
-  let filepath;
-  switch (type) {
-    case "landing":
-      filepath = path.join(IMAGE_DIR_LANDING, filename);
-      break;
-    case "category":
-      filepath = path.join(IMAGE_DIR_CATEGORIES, filename);
-      break;
-    case "product":
-    default:
-      filepath = path.join(IMAGE_DIR_PRODUCTS, filename);
-      break;
-  }
-
   try {
     let imagePipeline = sharp(buffer);
 
@@ -72,52 +45,59 @@ export const processAndSaveImage = async (
       });
     }
 
-    // Convert to WebP with specified quality
-    await imagePipeline
+    // Process image to WebP
+    const processedImageBuffer = await imagePipeline
       .webp({
         quality: quality,
-        lossless: false, // Use lossy compression for better size optimization
-        effort: 6, // Higher effort = better compression but slower processing (0-6)
+        lossless: false,
+        effort: 6,
       })
-      .toFile(filepath);
+      .toBuffer();
 
-    // Construct the full URL
-    const urlPath = type === "landing" 
-      ? "landing" 
-      : type === "category" 
-        ? "categories" 
-        : "products";
+    // Generate unique filename
+    const uniqueSuffix = uuidv4();
+    const filename = `${uniqueSuffix}.webp`;
     
-    return `${BASE_URL}/images/${urlPath}/${filename}`;
+    // Determine S3 key (path)
+    const s3Key = `images/${type}s/${filename}`;
+
+    // Upload to S3
+    const uploadCommand = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      Body: processedImageBuffer,
+      ContentType: 'image/webp',
+    });
+
+    await s3Client.send(uploadCommand);
+
+    // Return the public URL
+    return `${BASE_URL}/${s3Key}`;
 
   } catch (error) {
-    console.error("Error processing and saving image:", error);
-    throw new Error("Failed to process and save image.");
+    console.error("Error processing and saving image to S3:", error);
+    throw new Error("Failed to process and save image to S3.");
   }
 };
 
 /**
- * Delete an image from the server.
+ * Delete an image from S3.
  * @param {String} imageUrl - The full URL of the image.
  */
 export const deleteImage = async (imageUrl) => {
   try {
+    // Extract the key from the URL
     const url = new URL(imageUrl);
-    let imagePath;
+    const s3Key = url.pathname.substring(1); // Remove leading slash
 
-    if (url.pathname.startsWith("/images/products/")) {
-      imagePath = path.join(IMAGE_DIR_PRODUCTS, path.basename(url.pathname));
-    } else if (url.pathname.startsWith("/images/landing/")) {
-      imagePath = path.join(IMAGE_DIR_LANDING, path.basename(url.pathname));
-    } else if (url.pathname.startsWith("/images/categories/")) {
-      imagePath = path.join(IMAGE_DIR_CATEGORIES, path.basename(url.pathname));
-    } else {
-      throw new Error("Unknown image type");
-    }
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+    });
 
-    await fs.unlink(imagePath);
+    await s3Client.send(deleteCommand);
   } catch (error) {
-    console.error(`Failed to delete image: ${imageUrl}`, error);
+    console.error(`Failed to delete image from S3: ${imageUrl}`, error);
     return null;
   }
 };

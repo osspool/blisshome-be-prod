@@ -18,6 +18,9 @@ import couponRoutes from "./routes/order/coupons.js";
 import deliveryPricingRoutes from "./routes/order/deliveryPricing.js";
 import paymentMethodsRoutes from "./routes/order/paymentMethods.js";
 import paymentRoutes from "./routes/order/payments.js";
+import customerRoutes from "./routes/common/customers.js"
+import dashboardRoutes from "./routes/common/dashboard.js";
+import recommendationRoutes from "./routes/product/recommendations.js";
 // import landingPageRoutes from "./routes/landingPage.js";
 import orderRoutes from "./routes/order/orders.js";
 
@@ -27,6 +30,10 @@ import apiKeyMiddleware from "./middlewares/apiKeyMiddleware.js";
 
 dotenv.config();
 connectDB();
+
+// Start the scheduler
+// scheduleMonthlyAggregation();
+
 
 const app = express();
 
@@ -93,7 +100,9 @@ app.use("/api/orders", apiKeyMiddleware, orderRoutes);
 app.use("/api/coupons", apiKeyMiddleware, couponRoutes);
 app.use("/api/payment-methods", apiKeyMiddleware, paymentMethodsRoutes);
 app.use("/api/payments", apiKeyMiddleware, paymentRoutes);
-// app.use('/api/recommendations', recommendationRoutes);
+app.use("/api/customers", apiKeyMiddleware, customerRoutes);
+app.use("/api/admin", apiKeyMiddleware, dashboardRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 app.use("/api/delivery-pricing", apiKeyMiddleware, deliveryPricingRoutes);
 
 // Error Handling Middleware
