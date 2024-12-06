@@ -1,10 +1,12 @@
 // src/routes/auth.js
 import express from "express";
 import {
+  forgotPassword,
   getProfile,
   login,
   refreshToken,
   register,
+  resetPassword,
   // forgotPassword,
   // resetPassword,
 } from "../controllers/authController.js";
@@ -19,7 +21,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh", refreshToken);
 // password reset
-// router.post("/forgot-password", forgotPassword);
-// router.post("/reset-password", resetPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;

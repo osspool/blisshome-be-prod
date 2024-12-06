@@ -4,6 +4,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { generateTokens } from "../utils/generateToken.js";
+import { sendEmail } from "#src/services/emailService.js";
 
 const register = async (req, res) => {
   const { name, email, password, role = "customer" } = req.body;
@@ -100,74 +101,95 @@ const getProfile = async (req, res) => {
   }
 };
 
-// const forgotPassword = async (req, res) => {
-//   const { email } = req.body;
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
 
-//   try {
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-//     const token = crypto.randomBytes(20).toString("hex");
-//     user.resetPasswordToken = token;
-//     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-//     await user.save();
+    const token = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
 
-//     const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
-//     const { data, error } = await resend.emails.send({
-//       from: process.env.RESEND_EMAIL,
-//       to: email,
-//       subject: "Password Reset Request",
-//       html: `<p>You requested a password reset. Click <a href="${resetLink}">here</a> to reset your password.</p>
-//              <p>This link will expire in 1 hour.</p>
-//              <p>If you didn't request this, please ignore this email.</p>`,
-//     });
+    // Create HTML template for password reset email
+    const htmlTemplate = `
+      <h2>Password Reset Request</h2>
+      <p>You requested a password reset. Click the link below to reset your password:</p>
+      <p><a href="${resetLink}">Reset Password</a></p>
+      <p>This link will expire in 1 hour.</p>
+      <p>If you didn't request this, please ignore this email.</p>
+      <p>Thank you!</p>
+    `;
 
-//     if (error) {
-//       console.error("Error sending email:", error);
-//       return res.status(500).json({ message: "Error sending reset email" });
-//     }
+    // Create plain text version
+    const textVersion = `
+      Password Reset Request
+      
+      You requested a password reset. Click the following link to reset your password:
+      ${resetLink}
+      
+      This link will expire in 1 hour.
+      
+      If you didn't request this, please ignore this email.
+      
+      Thank you!
+    `;
 
-//     res.json({ message: "Password reset email sent" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+    // Send email using the sendEmail service
+    await sendEmail(
+      email,
+      "Password Reset Request",
+      textVersion,
+      htmlTemplate
+    );
 
-// const resetPassword = async (req, res) => {
-//   const { token, newPassword } = req.body;
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    res.status(500).json({ 
+      message: "Error sending reset email",
+      error: error.message 
+    });
+  }
+};
 
-//   try {
-//     const user = await User.findOne({
-//       resetPasswordToken: token,
-//       resetPasswordExpires: { $gt: Date.now() },
-//     });
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
 
-//     if (!user) {
-//       return res.status(400).json({ message: "Invalid or expired token" });
-//     }
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
 
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-//     user.password = hashedPassword;
-//     user.resetPasswordToken = undefined;
-//     user.resetPasswordExpires = undefined;
-//     await user.save();
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
 
-//     res.json({ message: "Password has been reset" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password has been reset" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 export {
   register,
   login,
   refreshToken,
   getProfile,
-  // forgotPassword,
-  // resetPassword,
+  forgotPassword,
+  resetPassword,
 };
