@@ -63,7 +63,7 @@ export const getCustomers = async (req, res) => {
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
       sort: { [sortField]: sortOrder === "desc" ? -1 : 1 },
-      select: "name email phone role addresses totalOrders totalPurchases createdAt",
+      select: "name email phone role addresses totalOrders totalPurchases cancelledOrders createdAt",
       lean: true,
     };
 

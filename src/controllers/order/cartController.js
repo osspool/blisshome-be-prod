@@ -8,14 +8,18 @@ import { quantityChecker } from "#services/cartService.js";
 // @access  Private
 export const getCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ user: req.user._id }).populate(
-      "items.product",
-      "name basePrice images variations"
-    );
+    let cart = await Cart.findOne({ user: req.user._id })
+      .populate({
+        path: "items.product",
+        select: "name images variations discount basePrice", // Include necessary fields for currentPrice calculation
+      })
+      .exec();
+
     if (!cart) {
       cart = new Cart({ user: req.user._id, items: [] });
       await cart.save();
     }
+
     res.json(cart);
   } catch (error) {
     console.error(error);

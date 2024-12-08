@@ -34,14 +34,12 @@ export const createOrder = async (userId, orderData) => {
     const deliveryAddress = await getDeliveryAddress(user, useSavedAddress, deliveryAddressId, manualAddress);
 
     // Fetch delivery pricing
-    // console.log("ddd", deliveryMethodId)
     const deliveryRule = await DeliveryPricing.findById(deliveryMethodId);
     if (!deliveryRule) throw new Error("Invalid delivery method");
 
     // Initialize order items and pricing
     let totalAmount = 0;
     const orderItems = [];
-    const bulkProductOperations = [];
 
     // Process cart items
     for (let item of cart.items) {
@@ -52,7 +50,7 @@ export const createOrder = async (userId, orderData) => {
       }
 
       // Calculate item price considering variations
-      let itemPrice = product.basePrice;
+      let itemPrice = product.currentPrice;
       if (item.variations && Array.isArray(item.variations)) {
         for (let variation of item.variations) {
           const { name, option } = variation;
@@ -125,6 +123,7 @@ export const createOrder = async (userId, orderData) => {
     // Update user statistics
     user.totalOrders += 1;
     user.totalPurchases += totalAmount;
+    await user.save(); // Save the updated user
 
     // Create payment based on payment type
     let createdPayment = await createPayment({

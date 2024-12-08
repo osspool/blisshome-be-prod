@@ -41,7 +41,8 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     totalOrders: { type: Number, default: 0 },
-  totalPurchases: { type: Number, default: 0 },
+    totalPurchases: { type: Number, default: 0 },
+    cancelledOrders: { type: Number, default: 0 },
   },
   {
     timestamps: true,
